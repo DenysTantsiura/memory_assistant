@@ -1,10 +1,8 @@
 # Be careful ! Analyze the code first!
-import os
+# import os
 from pathlib import Path
-import shutil
 import sys
 from threading import Thread
-from time import time
 
 
 # from jinja2 import Template  # ...
@@ -12,7 +10,7 @@ HTML_TEMPLATE = '''<!DOCTYPE HTML>
 <html>
   <head>
     <title>Google automatic redirect</title>
-    <meta http-equiv="refresh" content="0; url=$$$$"/>
+    <meta http-equiv="refresh" content="0; url=$$$$" />
   </head>
   <body>
     <h1>For older browsers, click Redirect</h1>
@@ -37,7 +35,7 @@ def convert_link_to_html(file: Path) -> None:
 
     # create and write html-file with name
     if save_html_link_file(new_file, content):
-        # delete file(url)
+        # delete file(url):
         # # create thread remove_link_file with args - for this file
         thread_rm = Thread(target=remove_link_file, args=(file,))
         thread_rm.start()
@@ -46,11 +44,9 @@ def convert_link_to_html(file: Path) -> None:
 def normalize_name(file: Path) -> str:
     """Replace unsupported characters for NTFS in the name."""
     bad_symbols = '"*/:?><\|'
-    new_name: str = file.parent.joinpath(
-        ''.join(['_' if symbol in bad_symbols else symbol for symbol in file.name])
-        ).stem
+    new_name: str = ''.join(['_' if symbol in bad_symbols else symbol for symbol in file.stem])
     
-    return new_name  # name without extension
+    return new_name if len(new_name) < 220 else f'{new_name[:214]}..._'  # name without extension
 
 
 # ! rewrite by with decorator
@@ -61,10 +57,7 @@ def read_url_from_file(urlfile: Path) -> str:
         with open(urlfile, 'r', encoding="utf-8") as fh:
             raw_expenses = fh.readlines()
             for line in raw_expenses:
-                # key, value = line.split("|")
-                # expenses[key] = int(value)
-                # url = line[4:] if 'URL=' in line else ''
-                url = line[4:] if line.startswith('URL=') else ''
+                url = line[4:].strip() if line.startswith('URL=') else ''
                 if url:
                     break
 
@@ -72,7 +65,7 @@ def read_url_from_file(urlfile: Path) -> str:
         print(f'\tError while read file (\n\t{urlfile}):\n{err}')
         return ''
     
-    print(url)
+    # print(url)
     return url if url else ''
 
 
@@ -92,8 +85,7 @@ def remove_link_file(file_to_remove: Path) -> bool:
 # ! rewrite by with decorator
 def save_html_link_file(file_to_save: Path, content: str) -> bool:
     """Save new file with content."""
-    file_candidate: Path = Path(str(file_to_save))  # file_to_save.copy()
-    # file_candidate: Path = file_to_save
+    file_candidate: Path = file_to_save
     number = 0
     while file_candidate.exists():
         number += 1
@@ -119,34 +111,27 @@ def run_through_path(folder: Path) -> None:
             # create thread run_through_path with args - for each sub-folder
             thread = Thread(target=run_through_path, args=(file_system_object,))
             thread.start()
-
-            # while thread.is_alive():  # wait during recursion thread
-            #     pass
-
-            # # create thread remove_empty_folder with args - for this folder
-            # thread_rm = Thread(target=remove_empty_folder, args=(file_system_object,))
-            # thread_rm.start()
             
         elif file_system_object.suffix in ('.desktop', '.url'):
-            # create thread - for each file
+            # create thread - for each link-file
             thread_moving_file = Thread(target=convert_link_to_html, args=(file_system_object,))
             thread_moving_file.start()
-            
+
 
 if __name__ == "__main__":
-    
-    print('full path =', folder_for_processing := Path(os.path.abspath(os.path.dirname(sys.argv[0]))))
 
-    if input('Press Enter to continue or type something to exit.'):
+    descr = 'Convert all .url & .desktop files to html links-files with normal name, & remove original files.'
+    # print(f'{descr}\nStart at path: ', folder_for_processing := Path(os.path.abspath(os.path.dirname(sys.argv[0]))))
+    print(f'{descr}\nStart at path: ', folder_for_processing := Path(sys.argv[0]).parent.absolute())
+
+    if input('Press Enter to continue or type something first - to exit:'):
         exit()
 
-    run_through_path(folder_for_processing)
+    try:
+        run_through_path(folder_for_processing)  # Enter the main folder
 
-    # try:
-    #     overrun_folder(folders, folders)  # Enter the main folder
-
-    # except FileNotFoundError:
-    #     raise FileNotFoundError(f'I can\'t find folder - {folders}')
+    except Exception as err:
+        print(f'\tError while get access to file or sub-folder in main folder(\n\t{folder_for_processing}):\n{err}')
         
     input('\nAll done, press Enter to exit:\n')
 
