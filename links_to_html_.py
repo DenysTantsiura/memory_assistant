@@ -3,7 +3,7 @@
 from pathlib import Path
 import sys
 from threading import Thread
-
+#!!!!!!!!!! .url + . URL!!!! same .desKTop
 
 # from jinja2 import Template  # ...
 HTML_TEMPLATE = '''<!DOCTYPE HTML>
@@ -112,14 +112,13 @@ def run_through_path(folder: Path) -> None:
             thread = Thread(target=run_through_path, args=(file_system_object,))
             thread.start()
             
-        elif file_system_object.suffix in ('.desktop', '.url'):
+        elif file_system_object.suffix.lower() in ('.desktop', '.url'):
             # create thread - for each link-file
             thread_moving_file = Thread(target=convert_link_to_html, args=(file_system_object,))
             thread_moving_file.start()
 
 
-if __name__ == "__main__":
-
+def main() -> None:
     descr = 'Convert all .url & .desktop files to html links-files with normal name, & remove original files.'
     # print(f'{descr}\nStart at path: ', folder_for_processing := Path(os.path.abspath(os.path.dirname(sys.argv[0]))))
     print(f'{descr}\nStart at path: ', folder_for_processing := Path(sys.argv[0]).parent.absolute())
@@ -135,3 +134,6 @@ if __name__ == "__main__":
         
     input('\nAll done, press Enter to exit:\n')
 
+
+if __name__ == "__main__":
+    main()

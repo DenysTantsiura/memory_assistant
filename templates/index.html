@@ -1,0 +1,70 @@
+<!doctype html>
+<!-- This is an no automatically generated file.
+     It will be read and overwritten.
+     DO NOT EDIT! -->
+<html lang="en" class="h-100">
+<head>
+    <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+    <TITLE>Bookmarks_2022</TITLE>
+
+
+<style>
+  .del {
+    display: none;
+  }
+
+  .del:not(:checked)+label+* {
+    display: none;
+  }
+
+  /* фактически нужна только одна строка */
+
+  /* вид CSS кнопки */
+  .del:not(:checked)+label,
+  .del:checked+label {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 2px;
+    color: #fff;
+    background: #4e6473;
+    cursor: pointer;
+  }
+
+  .del:checked+label {
+    background: #e36443;
+  }
+</style>
+
+
+
+    <!-- Custom styles for this template -->
+  <!-- <link href="static/cover.css" rel="stylesheet">-->
+</head>
+<font color="#9fff60">Bookmarks_2023-04-02 ()</font><br>
+
+<body alink="#ff0000" bgcolor="#000000" link="#9fff6" text="#9fff60" vlink="#9fff600">
+  <center>
+    <table bgcolor="#2a3e21" border="0" bordercolor="#9fff60" cellpadding="1" cellspacing="17%" width="100%">
+      <tbody>
+        <tr>
+          <td>
+            
+    {% for line in link_lines %}
+      {% for el in line %}
+
+      <a href="{{ el[0] }}">
+        <img src="{{ el[1] }}" width="72" height="72" alt="{{ el[0] }}" border="0"
+          height="72" width="72">
+      </a>
+    
+      {% endfor %}
+    <br>
+    {% endfor %}
+
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </center>
+</body>
+</html>
