@@ -5,7 +5,7 @@
 <html lang="en" class="h-100">
 <head>
     <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-    <TITLE>Bookmarks_2022</TITLE>
+    <TITLE>Bookmarks_2023</TITLE>
 
 
 <style>
@@ -51,12 +51,13 @@
             
     {% for line in link_lines %}
       {% for el in line %}
-
-      <a href="{{ el[0] }}">
-        <img src="{{ el[1] }}" width="72" height="72" alt="{{ el[0] }}" border="0"
-          height="72" width="72">
-      </a>
-    
+            {% if el[0] %}
+            <a href="{{ el[0] }}">
+            {% endif %}
+            <img src="{{ el[1] }}" width="72" height="72" alt="{{ el[0] }}" border="0" height="72" width="72">
+            {% if el[0] %}
+            </a>
+            {% endif %}
       {% endfor %}
     <br>
     {% endfor %}
