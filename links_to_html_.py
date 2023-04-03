@@ -93,8 +93,8 @@ def save_html_link_file(file_to_save: Path, content: str) -> str:
         number += 1
         file_candidate = file_to_save.parent.joinpath(f'{file_to_save.stem}{str(number)}.html')
 
-        with open(file_candidate, 'w', encoding='utf-8') as fh:
-            fh.write(f'{content}\n')
+    with open(file_candidate, 'w', encoding='utf-8') as fh:
+        fh.write(f'{content}\n')
 
     return 'True'
 
