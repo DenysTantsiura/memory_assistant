@@ -1,5 +1,4 @@
 # Be careful ! Analyze the code first!
-# import os
 from pathlib import Path
 import sys
 from threading import Thread
@@ -18,6 +17,21 @@ HTML_TEMPLATE = '''<!DOCTYPE HTML>
   </body>
 </html>
 '''
+
+
+def catch_file_exceptions(function):
+    def wrapper(*args, **kwargs):
+        try:
+            reresult = function(*args, **kwargs)
+
+        except Exception as err:
+            print(f'\tError while processing arguments(\n\t{args},\n{kwargs}):\n\t{err}')
+            return ''
+
+        return reresult
+    
+    return wrapper
+
 
 def convert_link_to_html(file: Path) -> None:
     """Create html with url-link from url-file."""
@@ -43,47 +57,35 @@ def convert_link_to_html(file: Path) -> None:
 
 def normalize_name(file: Path) -> str:
     """Replace unsupported characters for NTFS in the name."""
-    bad_symbols = '"*/:?><\|'
+    bad_symbols = '"*/?><:|\\'
     new_name: str = ''.join(['_' if symbol in bad_symbols else symbol for symbol in file.stem])
     
     return new_name if len(new_name) < 220 else f'{new_name[:214]}..._'  # name without extension
 
 
-# ! rewrite by with decorator
+@catch_file_exceptions
 def read_url_from_file(urlfile: Path) -> str:
     """Read file and return url if exist, or empty string."""
     url = ''
-    try:
-        with open(urlfile, 'r', encoding="utf-8") as fh:
-            raw_expenses = fh.readlines()
-            for line in raw_expenses:
-                url = line[4:].strip() if line.startswith('URL=') else ''
-                if url:
-                    break
+    with open(urlfile, 'r', encoding='utf-8') as fh:
+        raw_expenses = fh.readlines()
+        for line in raw_expenses:
+            url = line[4:].strip() if line.startswith('URL=') else ''
+            if url:
+                break
 
-    except Exception as err:
-        print(f'\tError while read file (\n\t{urlfile}):\n{err}')
-        return ''
-    
-    # print(url)
     return url if url else ''
 
 
-# ! rewrite by with decorator
-def remove_link_file(file_to_remove: Path) -> bool:
+@catch_file_exceptions
+def remove_link_file(file_to_remove: Path) -> str:
     """Remove file (silent)."""
-    try:
-        file_to_remove.unlink(missing_ok=True)  # missing exceptions will be ignored
-
-    except Exception as err:
-        print(f'\tError while try remove file (\n\t{file_to_remove}):\n{err}')
-        return False
-
-    return True
+    file_to_remove.unlink(missing_ok=True)  # missing exceptions will be ignored
+    return 'True'
     
 
-# ! rewrite by with decorator
-def save_html_link_file(file_to_save: Path, content: str) -> bool:
+@catch_file_exceptions
+def save_html_link_file(file_to_save: Path, content: str) -> str:
     """Save new file with content."""
     file_candidate: Path = file_to_save
     number = 0
@@ -91,15 +93,10 @@ def save_html_link_file(file_to_save: Path, content: str) -> bool:
         number += 1
         file_candidate = file_to_save.parent.joinpath(f'{file_to_save.stem}{str(number)}.html')
 
-    try:
-        with open(file_candidate, 'w', encoding="utf-8") as fh:
-            fh.write(f'{content}\n')
+    with open(file_candidate, 'w', encoding='utf-8') as fh:
+        fh.write(f'{content}\n')
 
-    except Exception as err:
-        print(f'\tError while try save file (\n\t{file_candidate}):\n{err}')
-        return False
-
-    return True
+    return 'True'
 
 
 def run_through_path(folder: Path) -> None:
@@ -112,14 +109,13 @@ def run_through_path(folder: Path) -> None:
             thread = Thread(target=run_through_path, args=(file_system_object,))
             thread.start()
             
-        elif file_system_object.suffix in ('.desktop', '.url'):
+        elif file_system_object.suffix.lower() in ('.desktop', '.url'):
             # create thread - for each link-file
             thread_moving_file = Thread(target=convert_link_to_html, args=(file_system_object,))
             thread_moving_file.start()
 
 
-if __name__ == "__main__":
-
+def main() -> None:
     descr = 'Convert all .url & .desktop files to html links-files with normal name, & remove original files.'
     # print(f'{descr}\nStart at path: ', folder_for_processing := Path(os.path.abspath(os.path.dirname(sys.argv[0]))))
     print(f'{descr}\nStart at path: ', folder_for_processing := Path(sys.argv[0]).parent.absolute())
@@ -133,5 +129,8 @@ if __name__ == "__main__":
     except Exception as err:
         print(f'\tError while get access to file or sub-folder in main folder(\n\t{folder_for_processing}):\n{err}')
         
-    input('\nAll done, press Enter to exit:\n')
+    input('\nAll done, press Enter\n')
 
+
+if __name__ == '__main__':
+    main()
